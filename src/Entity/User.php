@@ -4,10 +4,12 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity(fields={"email"}, message="There is already an account with this email")
  */
 class User implements UserInterface {
 	/**
@@ -32,6 +34,26 @@ class User implements UserInterface {
 	 * @ORM\Column(type="string")
 	 */
 	private $password;
+
+	/**
+	 * @ORM\Column(type="string", length=255, nullable=true)
+	 */
+	private $name;
+
+	/**
+	 * @ORM\Column(type="boolean", nullable=true)
+	 */
+	private $subscription_status;
+
+	/**
+	 * @ORM\Column(type="string", length=255, nullable=true)
+	 */
+	private $agreement_id;
+
+	/**
+	 * @ORM\Column(type="string", length=255, nullable=true)
+	 */
+	private $payer_id;
 
 	public function getId(): ?int {
 		return $this->id;
@@ -99,5 +121,45 @@ class User implements UserInterface {
 	public function eraseCredentials() {
 		// If you store any temporary, sensitive data on the user, clear it here
 		// $this->plainPassword = null;
+	}
+
+	public function getName(): ?string {
+		return $this->name;
+	}
+
+	public function setName(?string $name): self {
+		$this->name = $name;
+
+		return $this;
+	}
+
+	public function getSubscriptionStatus(): ?bool {
+		return $this->subscription_status;
+	}
+
+	public function setSubscriptionStatus(?bool $subscription_status): self {
+		$this->subscription_status = $subscription_status;
+
+		return $this;
+	}
+
+	public function getAgreementId(): ?string {
+		return $this->agreement_id;
+	}
+
+	public function setAgreementId(?string $agreement_id): self {
+		$this->agreement_id = $agreement_id;
+
+		return $this;
+	}
+
+	public function getPayerId(): ?string {
+		return $this->payer_id;
+	}
+
+	public function setPayerId(?string $payer_id): self {
+		$this->payer_id = $payer_id;
+
+		return $this;
 	}
 }
