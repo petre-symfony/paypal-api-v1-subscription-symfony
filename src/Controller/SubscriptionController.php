@@ -25,7 +25,7 @@ class SubscriptionController extends AbstractController {
 	}
 
 	private function canWatchVideos(){
-		if($this->getUser()){
+		if($this->getUser() && $this->getUser()->getSubscriptionStatus()){
 			return true;
 		}
 
