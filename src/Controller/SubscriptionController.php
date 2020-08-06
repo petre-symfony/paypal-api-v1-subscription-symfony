@@ -10,7 +10,11 @@ class SubscriptionController extends AbstractController {
 	 * @Route("/", name="videos")
 	 */
 	public function videos() {
-		return $this->render('subscription/videos.html.twig');
+		if ($this->canWatchVideos()) $canWatchVideos = true;
+		else $canWatchVideos=false;
+		return $this->render('subscription/videos.html.twig',
+			compact('canWatchVideos')
+		);
 	}
 
 	/**
@@ -20,4 +24,11 @@ class SubscriptionController extends AbstractController {
 		return $this->render('subscription/pricing.html.twig');
 	}
 
+	private function canWatchVideos(){
+		if($this->getUser()){
+			return true;
+		}
+
+		return false;
+	}
 }
