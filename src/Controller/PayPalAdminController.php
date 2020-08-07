@@ -120,4 +120,14 @@ class PayPalAdminController extends AbstractController {
 			die();
 		}
 	}
+
+	/**
+	 * @Route("/show-plans", name="show-plans")
+	 */
+	public function showPlans(){
+		$params = array('page_size' => '20', 'status' => 'ALL'); //CREATED, ACTIVE, INACTIVE, ALL
+
+		$planList = Plan::all($params, $this->apiContext);
+		print_r($planList->toArray());die();
+	}
 }
