@@ -2,12 +2,14 @@
 
 namespace App\Controller;
 
+use App\Utils\PayPalApiCredentialsTrait;
 use PayPal\Api\Currency;
 use PayPal\Api\MerchantPreferences;
+use PayPal\Api\Patch;
+use PayPal\Api\PatchRequest;
 use PayPal\Api\PaymentDefinition;
 use PayPal\Api\Plan;
-use PayPal\Auth\OAuthTokenCredential;
-use PayPal\Rest\ApiContext;
+use PayPal\Common\PayPalModel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -16,16 +18,16 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  * @Route("/admin")
  */
 class PayPalAdminController extends AbstractController {
+	use PayPalApiCredentialsTrait;
+
+	public function __construct() {
+		$this->setCredentials();
+	}
+
 	/**
 	 * @Route("/create-plan", name="create-plan")
 	 */
 	public function createPlan() {
-		$apiContext = new ApiContext(
-			new OAuthTokenCredential(
-				$_ENV['PAYPAL_CLIENT_ID'],
-				$_ENV['PAYPAL_CLIENT_SECRET']
-			)
-		);
 
 		$plan = new Plan();
 		$plan->setName('Pro plan');
@@ -87,12 +89,35 @@ class PayPalAdminController extends AbstractController {
 		$plan->setMerchantPreferences($merchantPreferences);
 
 		try {
-			$createdPlan = $plan->create($apiContext);
+			$createdPlan = $plan->create($this->apiContext);
 		} catch (\Exception $e){
 			print_r($e->getMessage());
 			die();
 		}
 
-		dd($createdPlan);
+		$this->activatePlan($createdPlan);
+	}
+
+	public function activatePlan(Plan $plan){
+		try{
+			$patch = new Patch();
+			$value = new PayPalModel('{
+				"state": "ACTIVE"
+			}');
+
+			$patch->setOp('replace')
+				->setPath('/')
+				->setValue($value)
+			;
+
+			$patchRequest = new PatchRequest();
+			$patchRequest->addPatch($patch);
+
+			$plan->update($patchRequest, $this->apiContext);
+			return $plan;
+		} catch (\Exception $e){
+			print_r($e->getMessage());
+			die();
+		}
 	}
 }
